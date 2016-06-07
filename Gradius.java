@@ -127,7 +127,7 @@ public class Gradius extends Canvas implements ActionListener, KeyListener, Runn
 		}
 
 		if (started) {
-			if (ticks % 75 == 0){
+			if (ticks % 60 * difficulty == 0){
 				addStars();
 				ticks = 0;
 			}
@@ -148,11 +148,11 @@ public class Gradius extends Canvas implements ActionListener, KeyListener, Runn
 					}
 				}
 				if(eUp){
-					enemies.get(i).y -= 5;
+					enemies.get(i).y -= 3;
 				
 				}
 				else if(eDown){
-					enemies.get(i).y += 5;
+					enemies.get(i).y += 3;
 				
 				}
 				enemies.get(i).x -= enemySpeed;
@@ -162,23 +162,42 @@ public class Gradius extends Canvas implements ActionListener, KeyListener, Runn
 				if (enemies.get(i).y >= HEIGHT - 150){
 					enemies.get(i).y = HEIGHT - 150;
 				}
+				
 			}
 
 			/*
-			 * Star Movemnent
+			 * Star Movement
 			 */
-			for (int i = 0; i < stars.size(); i++) {
+			for (int s = 0; s < stars.size(); s++) {
 				int starMovement = rand.nextInt(5) +  1;
-				stars.get(i).x -= starMovement;
+				stars.get(s).x -= starMovement;
+			}
+			/*
+			 * Wall movement
+			 */
+			for (int w = 0; w < walls.size();w++){
+				walls.get(w).x -= enemySpeed;
+				Rectangle wall = walls.get(w);
+				if (ship.intersects(wall)){
+					if (ship.y <= wall.y + wall.height){
+						ship.y = wall.y + wall.height;
+					}
+					if (ship.y + ship.height >= wall.y){
+						ship.y = wall.y - ship.height;
+					}
+					if (ship.x + ship.width >= wall.x){
+						ship.x = wall.x - ship.width;
+					}
+				}
+				
+			}
+			/*
+			 * Boundary movement
+			 */
+			for (int b = 0; b < boundaries.size(); b++){
+				boundaries.get(b).x -= enemySpeed;
 			}
 			
-			for (int i = 0; i< walls.size();i++){
-				walls.get(i).x -= difficulty;
-			}
-			for (int i = 0; i < boundaries.size(); i++){
-				boundaries.get(i).x -= difficulty;
-			}
-
 			/*
 			 * If enemy is off screen, take a life away if game is being played,
 			 * and remove it from the array, then add a new one outside the
@@ -235,6 +254,9 @@ public class Gradius extends Canvas implements ActionListener, KeyListener, Runn
 					lives--;
 					gameOver = true;
 					powers.clear();
+					bullets.clear();
+					walls.clear();
+					boundaries.clear();
 				}
 			}
 
@@ -333,6 +355,9 @@ public class Gradius extends Canvas implements ActionListener, KeyListener, Runn
 			if (lives < 3 && !started) {
 				lives = 3;
 				powers.clear();
+				walls.clear();
+				bullets.clear();
+				
 			}
 
 			renderer.repaint();
@@ -539,6 +564,7 @@ public class Gradius extends Canvas implements ActionListener, KeyListener, Runn
 			superBullets.clear();
 			ship = new Rectangle(WIDTH / 2, HEIGHT / 2, 44, 44);
 			enemies.clear();
+			
 
 			if (lives == 0) {
 				score = 0;
@@ -598,15 +624,15 @@ public class Gradius extends Canvas implements ActionListener, KeyListener, Runn
 	}
 	
 	public void addBoundary(int x, int y){
-		boundaries.add(new Rectangle(x * 64, y * 64,32,32));
+		boundaries.add(new Rectangle(x * 32 + 1000, y * 32,32,32));
 	}
 	
 	public void addWall(int x, int y){
-		walls.add(new Rectangle(x * 32, y * 32,32,32));
+		walls.add(new Rectangle(x * 32 + 1000, y * 32,32,32));
 	}
 	
 	private void addEnemy(int x, int y) {
-		enemies.add(new Rectangle(x * 64 + 400, y * 64, 32,32));
+		enemies.add(new Rectangle(x * 32 + 1000, y * 32, 32,64));
 	}
 	public void addPlayer(int x, int y){
 		ship = new Rectangle(0,HEIGHT / 2,26,36);
